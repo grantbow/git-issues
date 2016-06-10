@@ -262,6 +262,8 @@ class Issue:
         self.note_change('tags', self.tags, tags)
         self.tags = tags
 
+    def __getitem__(self, key): return self.data[key]
+
     def __getstate__(self):
         odict = self.__dict__.copy()  # copy the dict since we change it
         del odict['changes']          # remove change log
@@ -1122,11 +1124,11 @@ if __name__ == '__main__':
             if "comment" in item[0]:
                 continue
             issue = item[1].get_data()
-            if issue.status in filteredStati:
+            if hasattr(issue, 'status') and issue.status in filteredStati:
                 continue
-            if wantedTags and not issue.tags:
+            if wantedTags and not (hasattr(issue, 'tags') or issue.tags):
                 continue
-            if wantedTags:
+            if wantedTags and hasattr(issue, 'tags') and issue.tags:
                 matchingTags = [tag for tag in issue.tags.split(", ")
                                 if tag in wantedTags]
                 if not matchingTags:
