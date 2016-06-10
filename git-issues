@@ -25,6 +25,7 @@ import cPickle
 from datetime import datetime
 
 import gitshelve
+import pdb
 
 try:
     from cStringIO import StringIO
@@ -99,7 +100,7 @@ class Comment:
         self.modified = None
         self.self_dirty = True
         self.attachments = []   # records filename and blob
-        self.issue.comments[self.get_name()] = self  # register into issue
+        self.issue.comment[self.get_name()] = self  # register into issue
 
     def mark_dirty(self):
         self.modified = datetime.now()
@@ -265,7 +266,7 @@ class IssueSet:
     Other IssueSet's can be generated from that one as "views" or queries into
     that data.
 
-    In essence, it contains both a set of Issue's which can be looked up by
+    In essence, it contains both a set of Issues which can be looked up by
     their unique identifier, and also certain global definition, like the
     allowable components, etc."""
     def __init__(self, shelf):
@@ -844,8 +845,9 @@ class GitIssue(Issue):
     def get_name(self):
         if not self.name:
             hash_func = self.issueSet.shelf.hash_blob
-            name = hash_func(unicode(self.created) + unicode(self.author) +
-                             self.title)
+            name = hash_func(unicode(self.created)
+                             + unicode(self.author)
+                             + self.title)
             self.name = name
         return self.name
 
@@ -1072,8 +1074,9 @@ if __name__ == '__main__':
         copy(__file__, issuesdir)
         copy(os.path.join(os.path.dirname(__file__), "gitshelve.py"), issuesdir)
         copy(os.path.join(os.path.dirname(__file__), "t_gitshelve.py"), issuesdir)
-        copy(os.path.join(os.path.dirname(__file__), "README"), issuesdir)
-        copy(os.path.join(os.path.dirname(__file__), "LICENSE"), issuesdir)
+        if os.path.isfile(os.path.join(os.path.dirname(__file__), "README")):
+            copy(os.path.join(os.path.dirname(__file__), "README"), issuesdir)
+        #copy(os.path.join(os.path.dirname(__file__), "LICENSE"), issuesdir)
         sys.exit(0)
 
 ######################################################################
@@ -1119,50 +1122,68 @@ if __name__ == '__main__':
             print "Usage: %s %s <issue-id | index>" % (sys.argv[0], command)
         else:
             issue = issueSet[args[0]]
-            comments = "\n       ".join(["Comment (%s): %s" % (comment[0:7],
-                                        issueSet.get_comment(comment[0:7]).comment)
-                                        for comment in issue.comments])
             if command == "show":
-                if issue.title:
-                    print "          Title:", issue.title
-                if issue.summary:
+                if hasattr(issue, 'name') and issue.name:
+                    print "          Title:", issue.name
+                if hasattr(issue, 'summary') and issue.summary:
                     print "        Summary:", format_long_text(issue.summary)
                     print
-                if issue.description:
+                if hasattr(issue, 'description') and issue.description:
                     print "    Description:", format_long_text(issue.description)
                     print
-                if issue.author:
+                if hasattr(issue, 'author') and issue.author:
                     print "         Author:", issue.author
-                if issue.reporters:
+                if hasattr(issue, 'reporters') and  issue.reporters:
                     print "    Reporter(s):", format_people_list(issue.reporters)
-                if issue.owners:
+                if hasattr(issue, 'owners') and issue.owners:
                     print "       Owner(s):", format_people_list(issue.owners)
-                if issue.assigned:
+                if hasattr(issue, 'assigned') and issue.assigned:
                     print "       Assigned:", format_people_list(issue.assigned)
-                if issue.carbons:
+                if hasattr(issue, 'carbons') and issue.carbons:
                     print "             Cc:", format_people_list(issue.carbons)
-
-                if issue.issue_type:
+                if hasattr(issue, 'issue_type') and issue.issue_type:
                     print "           Type:", issue.issue_type
-                if issue.status:
+                if hasattr(issue, 'status') and issue.status:
                     print "         Status:", issue.status
-                if issue.resolution:
+                if hasattr(issue, 'resolution') and issue.resolution:
                     print "     Resolution:", issue.resolution
-                if issue.components:
+                if hasattr(issue, 'components') and issue.components:
                     print "     Components:", issue.components
-                if issue.version:
+                if hasattr(issue, 'version') and issue.version:
                     print "        Version:", issue.version
-                if issue.milestone:
+                if hasattr(issue, 'milestone') and issue.milestone:
                     print "      Milestone:", issue.milestone
-                if issue.severity:
+                if hasattr(issue, 'severity') and issue.severity:
                     print "       Severity:", issue.severity
-                if issue.priority:
+                if hasattr(issue, 'priority') and issue.priority:
                     print "       Priority:", issue.priority
-                if issue.tags:
+                if hasattr(issue, 'tags') and issue.tags:
                     print "           Tags:", issue.tags
+                if hasattr(issue, 'comment'):# and (issue.comment > 0):
+                    # just a string! should be a comment object
+                    print "        Comment: %s" % issue.comment
+                    #pdb.set_trace()
+                    #index = 1
+                    #strings = None
+                    #print "c: %s" % issue.comment
+                    #print "c: %s" % dir(issue.comment)
+                    #print "c: %s" % issue.comment.__class__
+                    #print "       Comment (%s): " ,issue.comment, issue.comment.comment
+                    #if hasattr(issue.comment, 'comment'):# and (issue.comment > 0):
+                        #print "       Comment text: %s" % issue.comment.comment
+                    #for comment in issue.comment:
+                        #print "c: %s" % dir(issue.comment)
+                        #print "n: %s" % comment.name
+                        #strings=["Comment (%s): %s" % (comment.name,
+                        #         comment.comment)]
+                        #index=index+1
+                        #strings=["Comment (%s): %s" % (comment.name[0:7],
+                        #         issue.get_comment(comment.name[0:7]))]
+                    #comments = "\n       ".join(strings)
+                    #print "       Comments:", comments
 
                 print "        Created:", issue.created
-                if issue.modified:
+                if hasattr(issue, 'modified') and issue.modified:
                     print "       Modified:", issue.modified
             else:
                 write_object(issue)
