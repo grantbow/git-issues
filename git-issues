@@ -1150,10 +1150,11 @@ if __name__ == '__main__':
         else:
             issue = issueSet[args[0]]
             comments = ""
-            for comment in issue.comments:
-                comments += "Comment (%s): %s\n" % \
-                    (comment[0:7],
-                     issueSet.get_comment(comment[0:7]).comment.strip())
+            if hasattr(issue, 'comments'):
+                for comment in issue.comments:
+                    comments += "Comment (%s): %s\n" % \
+                        (comment[0:7],
+                         issueSet.get_comment(comment[0:7]).comment.strip())
             if command == "show":
                 if hasattr(issue, 'name') and issue.name:
                     print "          Title:", issue.name
