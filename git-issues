@@ -1148,7 +1148,11 @@ if __name__ == '__main__':
         if len(args) == 0:
             print "Usage: %s %s <issue-id | index>" % (command, command)
         else:
-            issue = issueSet[args[0]]
+            try:
+                issue = issueSet[args[0]]
+            except:
+                print "Missing issue: %s" % args[0]
+                sys.exit(1)
             comments = ""
             if hasattr(issue, 'comments'):
                 for comment in issue.comments:
