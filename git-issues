@@ -1137,7 +1137,7 @@ if __name__ == '__main__':
                 unicode(titleWidth + len("Title") - 1) + \
                 "s %-6s %5s %6s %s"
             print formatString % \
-                (index, issue.name[:7], issue.title, issue.status,
+                (index, (issue.name)[:7], issue.title, issue.status,
                  issue.created and issue.created.strftime('%m/%d'),
                  unicode(issue.author)[:6], '')
             index += 1
