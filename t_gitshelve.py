@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
+""" testing gitshelve
 
-import sys
+Todo:
+    * more tests
+"""
+
+#import sys
 import re
 import os
 import os.path
@@ -11,23 +16,35 @@ import exceptions
 
 try:
     from cStringIO import StringIO
-except:
+except ImportError:
     from StringIO import StringIO
 
-class t_gitshelve(unittest.TestCase):
+class Tgitshelve(unittest.TestCase): #pylint: disable=too-many-public-methods
+    """Test gitshelve main class
+
+    called as argument to unittest.TestLoader().loadTestsFromTestCase()
+
+    Returns:
+    """
     def setUp(self):
         if os.name == 'nt':
             self.tmpdir = os.getenv('TEMP')
         else:
             self.tmpdir = '/tmp'
-        try: gitshelve.git('branch', '-D', 'test')
-        except: pass
+        try:
+            gitshelve.git('branch', '-D', 'test')
+        except: #pylint: disable=bare-except
+            pass
 
     def tearDown(self):
-        try: gitshelve.git('branch', '-D', 'test')
-        except: pass
+        try:
+            gitshelve.git('branch', '-D', 'test')
+        except: #pylint: disable=bare-except
+            pass
 
-    def testBasicInsertion(self):
+    def test_basic_insertion(self):
+        """Test basic insertion
+        """
         shelf = gitshelve.open('test')
         text = "Hello, this is a test\n"
         shelf['foo/bar/baz.c'] = text
@@ -35,31 +52,39 @@ class t_gitshelve(unittest.TestCase):
         self.assertEqual(text, shelf['foo/bar/baz.c'])
 
         def foo1(shelf):
+            """Test return shelf bar function
+            """
             return shelf['foo/bar']
         self.assertRaises(exceptions.KeyError, foo1, shelf)
 
         del shelf
 
-    def testBasicDeletion(self):
+    def test_basic_deletion(self):
+        """Test basic deletion
+        """
         shelf = gitshelve.open('test')
         text = "Hello, this is a test\n"
         shelf['foo/bar/baz.c'] = text
         del shelf['foo/bar/baz.c']
 
         def foo2(shelf):
+            """Test return shelf baz.c function
+            """
             return shelf['foo/bar/baz.c']
         self.assertRaises(exceptions.KeyError, foo2, shelf)
 
         shelf['foo/bar/baz.c'] = text
         del shelf['foo/bar']
 
-        def foo4(shelf):
-            return shelf['foo/bar/baz.c']
-        self.assertRaises(exceptions.KeyError, foo4, shelf)
+        #def foo4(shelf): # identical function, different setup
+        #    return shelf['foo/bar/baz.c']
+        self.assertRaises(exceptions.KeyError, foo2, shelf)
 
         del shelf
 
-    def testInsertion(self):
+    def test_insertion(self):
+        """Test insertion
+        """
         shelf = gitshelve.open('test')
         text = "Hello, this is a test\n"
         shelf['foo/bar/baz.c'] = text
@@ -89,11 +114,11 @@ class t_gitshelve(unittest.TestCase):
         self.assertEqual(hash1, hash3)
 
         commit = gitshelve.git('cat-file', 'commit', 'test',
-                               keep_newline = True)
+                               keep_newline=True)
         self.assert_(re.search('first\n$', commit))
 
         data = gitshelve.git('cat-file', 'blob', 'test:foo/bar/baz.c',
-                             keep_newline = True)
+                             keep_newline=True)
         self.assertEqual(text, data)
 
         del shelf
@@ -108,7 +133,9 @@ class t_gitshelve(unittest.TestCase):
         self.assertEqual(text, shelf['foo/bar/baz.c'])
         del shelf
 
-    def testIterator(self):
+    def test_iterator(self):
+        """Test iterator
+        """
         shelf = gitshelve.open('test')
         text = "Hello, this is a test\n"
         shelf['foo/bar/baz1.c'] = text
@@ -125,7 +152,9 @@ path: (apple/orange/baz3.c)
 path: (foo/bar/baz1.c)
 """, buf.getvalue())
 
-    def testVersioning(self):
+    def test_versioning(self):
+        """Test versioning
+        """
         shelf = gitshelve.open('test')
         text = "Hello, this is a test\n"
         shelf['foo/bar/baz1.c'] = text
@@ -168,7 +197,7 @@ path: (foo/bar/baz1.c)
         self.assertEqual(text, shelf['foo/bar/baz1.c'])
         self.assertEqual(text, shelf['foo/bar/baz2.c'])
 
-        log = gitshelve.git('log', 'test', keep_newline = True)
+        log = gitshelve.git('log', 'test', keep_newline=True)
 
         self.assert_(re.match("""commit [0-9a-f]{40}
 Author: .+
@@ -179,10 +208,12 @@ Author: .+
 Date:   .+
 """, log))
 
-    def testDetachedRepo(self):
+    def test_detached_repo(self):
+        """Test  detached repo
+        """
         repotest = os.path.join(self.tmpdir, 'repo-test')
         repotestclone = os.path.join(self.tmpdir, 'repo-test-clone')
-        shelf = gitshelve.open(repository = repotest)
+        shelf = gitshelve.open(repository=repotest)
         text = "Hello, world!\n"
         shelf['foo.txt'] = text
 
@@ -209,13 +240,14 @@ Date:   .+
             if os.path.isdir(repotest):
                 shutil.rmtree(repotest)
 
-    def testBlobStore(self):
-        """Test use a gitshelve as a generic blob store."""
+    def test_blob_store(self):
+        """Test use a gitshelve as a generic blob store.
+        """
         try:
             blobpath = os.path.join(self.tmpdir, 'blobs')
-            shelf = gitshelve.open(repository = blobpath, keep_history = False)
+            shelf = gitshelve.open(repository=blobpath, keep_history=False)
             text = "This is just some sample text.\n"
-            hash = shelf.put(text)
+            myhash = shelf.put(text)
 
             buf = StringIO()
             shelf.dump_objects(buf)
@@ -223,7 +255,7 @@ Date:   .+
   blob acd291ce81136338a729a30569da2034d918e057: d291ce81136338a729a30569da2034d918e057
 """, buf.getvalue())
 
-            self.assertEqual(text, shelf.get(hash))
+            self.assertEqual(text, shelf.get(myhash))
 
             shelf.sync()
             buf = StringIO()
@@ -234,21 +266,24 @@ Date:   .+
 """, buf.getvalue())
             del shelf
 
-            shelf = gitshelve.open(repository = blobpath, keep_history = False)
+            shelf = gitshelve.open(repository=blobpath, keep_history=False)
             buf = StringIO()
             shelf.dump_objects(buf)
+            #pylint: disable=line-too-long
             self.assertEqual("""tree 6c6167149ccc5bf60892b65b84322c1943f5f7da: ac
   blob acd291ce81136338a729a30569da2034d918e057: d291ce81136338a729a30569da2034d918e057
 """, buf.getvalue())
 
-            self.assertEqual(text, shelf.get(hash))
+            self.assertEqual(text, shelf.get(myhash))
             del shelf
         finally:
             if os.path.isdir(blobpath):
                 shutil.rmtree(blobpath)
 
 def suite():
-    return unittest.TestLoader().loadTestsFromTestCase(t_gitshelve)
+    """Test suite
+    """
+    return unittest.TestLoader().loadTestsFromTestCase(Tgitshelve)
 
 if __name__ == '__main__':
     unittest.main()
