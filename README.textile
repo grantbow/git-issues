@@ -23,7 +23,7 @@ h1. Data Structure
 
 The data for @git-issues@ is kept in a separate branch configured through
 the issues.branch option. By default the branch is named @issues@.  The
-user is never intended to checkout this branch, it's used solely for record
+user is not intended to checkout this branch. It is used solely for record
 keeping by the @git-issues@ script.
 
 If you were to checkout this branch, you'd find a set of top-level
@@ -45,10 +45,10 @@ creation onward.  Issues are mutable, after all.
 
 The file is in a very straightforward form of XML, where each data string
 occupies its own line to facilitate merging.  Note that for any XML haters out
-there, you'll never have to look at this data.  I just picked XML because it's
+there, you will not have to look at this data.  I just picked XML because it's
 (a) relatively future-proof, and (b) very merge-friendly.
 
-The data contained maps directly on to what you see from the @git issues show@
+The contained data maps directly on to what you see from the @git issues show@
 command.  Use @git issues dump@ to view the XML directly, or for importing
 into a higher-level script.
 
@@ -72,7 +72,7 @@ Here's some of the data this file tracks:
 * Priority: high, med, low
 * Tags
 
-h2. @comment_[ISO_TIMESTAMP]_[HASH].xml@
+h2. @comment_[ISO_TIMESTAMP].xml@
 
 A comment is a note attached to an issue.  This XML file records:
 
@@ -105,7 +105,7 @@ and contains the following information.
 * Priorities
 
 Each of these identifies a legal set of values for the given field.  Only the
-"Tags" field is freely assignable to any value; all other fields must match
+"Tags" field is freely assignable to any value; all other fields should match
 one of the settings in the @project@ file.
 
 The Component field can also specify default "Owners" for each component.

@@ -1409,8 +1409,7 @@ description = """
     Defaults to index number over partial ID
 
     Commands:
-    init        Creates a copy of git-issues repository in .gitissues in the
-                current git repository.
+    init        Copies git-issues to .gitissues beside .git
     list        Lists issues for this repository
     new         Creates a new issue for this repository
     show/dump   Shows the given issue
